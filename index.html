@@ -64,6 +64,14 @@ body{background:var(--bg);font-family:-apple-system,"PingFang SC","Microsoft YaH
 .setup-box h4{font-weight:700;margin-bottom:16px}
 .ld{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.85);z-index:9998;display:flex;align-items:center;justify-content:center}
 .ld .spinner-border{width:3rem;height:3rem}
+.mlogin{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin:40px auto;max-width:500px}
+.mlogin h4{font-weight:700;margin-bottom:16px}
+.mopt{display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:10px;margin-bottom:8px;cursor:pointer;border:2px solid transparent;transition:border-color .2s}
+.mopt:hover{border-color:var(--c)}
+.mopt.sel{border-color:var(--c);background:#eef2ff}
+.mopt .ma{width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.share-box{background:#f0fdf4;border-radius:10px;padding:12px;margin-top:12px;font-size:13px;word-break:break-all}
+.share-box textarea{width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px;font-size:12px;resize:none;margin-top:6px}
 </style>
 </head>
 <body>
@@ -71,8 +79,8 @@ body{background:var(--bg);font-family:-apple-system,"PingFang SC","Microsoft YaH
 <!-- Loading -->
 <div v-if="loading" class="ld"><div class="text-center"><div class="spinner-border text-primary"></div><div class="mt-3" style="color:#6b7280">加载数据中…</div></div></div>
 
-<!-- Setup -->
-<div v-if="!connected && !loading">
+<!-- Setup (only show when not auto-connecting) -->
+<div v-if="!connected && !loading && !autoConnecting">
 <div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>GitHub 云端版</small></div>
 <div class="setup-box">
 <h4><i class="bi bi-github"></i> 连接 GitHub</h4>
@@ -85,9 +93,29 @@ body{background:var(--bg);font-family:-apple-system,"PingFang SC","Microsoft YaH
 </div>
 </div>
 
+<!-- Member Login -->
+<div v-if="connected && !loggedIn && !loading">
+<div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>选择你的身份</small></div>
+<div class="mlogin">
+<h4><i class="bi bi-person-circle"></i> 你是谁？</h4>
+<div v-if="data.members.length" style="margin-bottom:14px">
+<div v-for="m in data.members" :key="m.id" class="mopt" :class="{sel:selMemberId===m.id}" @click="selMemberId=m.id;newMemberName2=''">
+<div class="ma">{{ m.name[0] }}</div>
+<div style="flex:1;font-weight:600;font-size:15px">{{ m.name }}</div>
+</div>
+</div>
+<div style="margin-bottom:14px">
+<label class="form-label">我不在列表里，输入我的名字：</label>
+<input class="form-control" v-model="newMemberName2" placeholder="输入姓名" @keyup.enter="memberLogin" @focus="selMemberId=''">
+</div>
+<button class="btn btn-p w-100" @click="memberLogin"><i class="bi bi-box-arrow-in-right"></i> 进入系统</button>
+<div style="text-align:center;margin-top:12px"><a href="#" style="font-size:13px;color:#9ca3af" @click.prevent="logout">切换账号</a></div>
+</div>
+</div>
+
 <!-- Main -->
-<template v-if="connected && !loading">
-<div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>健康生活 · 快乐运动</small></div>
+<template v-if="connected && loggedIn && !loading">
+<div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>健康生活 · 快乐运动 &nbsp;|&nbsp; <span style="cursor:pointer;text-decoration:underline" @click="logout">{{ currentMember }} 退出</span></small></div>
 <div class="pg">
 
 <!-- Dashboard -->
@@ -153,6 +181,11 @@ body{background:var(--bg);font-family:-apple-system,"PingFang SC","Microsoft YaH
 <div v-if="!data.members.length" class="es" style="padding:12px"><i class="bi bi-person-plus" style="font-size:24px"></i>请先添加成员</div>
 <div v-else><span v-for="m in data.members" :key="m.id" class="mc">{{ m.name }} <i class="bi bi-x dl" @click="removeMember(m.id)"></i></span></div>
 </div>
+<div class="card"><div class="ct"><i class="bi bi-share"></i> 分享给同事</div>
+<p style="font-size:13px;color:#6b7280">生成分享链接，同事打开后只需选名字即可使用，无需输入 Token。</p>
+<button class="btn btn-p w-100" @click="genShareLink" style="padding:8px"><i class="bi bi-link-45deg"></i> 生成分享链接</button>
+<div v-if="shareLink" class="share-box"><div style="font-weight:600;color:#065f46">链接已生成，复制发给同事：</div><textarea rows="3" readonly @click="$event.target.select()">{{ shareLink }}</textarea></div>
+</div>
 <div class="card"><div class="ct"><i class="bi bi-list-ul"></i> 打卡记录</div>
 <div class="row g-2 mb-3"><div class="col-6"><select class="form-select form-select-sm" v-model="fMember" @change="filterRecs" style="font-size:13px"><option value="">全部成员</option><option v-for="m in data.members" :key="m.id" :value="m.id">{{ m.name }}</option></select></div><div class="col-6"><input type="month" class="form-control form-control-sm" v-model="fMonth" @change="filterRecs" style="font-size:13px"></div></div>
 <div v-if="!filteredRecs.length" class="es"><i class="bi bi-clipboard"></i>暂无记录</div>
@@ -181,6 +214,10 @@ createApp({setup(){
 const cfg=reactive({owner:'',repo:'',token:''}),connected=ref(false),connecting=ref(false),cfgError=ref(''),loading=ref(false);
 const data=reactive({members:[],records:[]});
 let sha=''; // data.json SHA for GitHub API updates
+
+// Member login
+const currentMember=ref(''),loggedIn=ref(false);
+const selMemberId=ref(''),newMemberName2=ref(''),shareLink=ref(''),autoConnecting=ref(false);
 
 // State
 const view=ref('dashboard'),saving=ref(false);
@@ -222,14 +259,25 @@ async function connect(){
     const d=await ghFetch();
     data.members=d.members||[];data.records=d.records||[];
     connected.value=true;calcStats();
+    try{localStorage.setItem('sport_cfg',JSON.stringify({owner:cfg.owner,repo:cfg.repo,token:cfg.token}))}catch(e){}
+    // Auto-login with saved member
+    try{
+      const savedMember=localStorage.getItem('sport_member');
+      if(savedMember){
+        const found=data.members.find(m=>m.name===savedMember);
+        if(found){currentMember.value=savedMember;form.member_id=found.id;loggedIn.value=true}
+      }
+    }catch(e){}
   }catch(e){
     if(e.message.includes('不存在')){
       // Create initial data.json
       const init={members:[],records:[]};
-      try{await ghSave(init,'Initial data');data.members=[];data.records=[];connected.value=true;calcStats()}
+      try{await ghSave(init,'Initial data');data.members=[];data.records=[];connected.value=true;calcStats();
+        try{localStorage.setItem('sport_cfg',JSON.stringify({owner:cfg.owner,repo:cfg.repo,token:cfg.token}))}catch(e2){}
+      }
       catch(e2){cfgError.value='创建文件失败: '+e2.message}
     }else cfgError.value='连接失败: '+e.message;
-  }finally{connecting.value=false}
+  }finally{connecting.value=false;autoConnecting.value=false}
 }
 
 // Stats
@@ -324,9 +372,61 @@ async function removeRecord(id){
   catch(e){data.records=old;showToast('删除失败','danger')}
 }
 
+// Member login/logout
+function memberLogin(){
+  let name='',mid='';
+  if(selMemberId.value){
+    const m=data.members.find(x=>x.id===selMemberId.value);
+    if(m){name=m.name;mid=m.id}
+  }else if(newMemberName2.value.trim()){
+    name=newMemberName2.value.trim();
+    let existing=data.members.find(m=>m.name===name);
+    if(!existing){
+      const id=data.members.length?Math.max(...data.members.map(m=>m.id))+1:1;
+      data.members.push({id,name});
+      ghSave(data,'Add member: '+name).catch(()=>{});
+      mid=id;
+    }else{mid=existing.id}
+  }
+  if(!name)return showToast('请选择或输入姓名','warning');
+  currentMember.value=name;
+  form.member_id=mid;
+  loggedIn.value=true;
+  try{localStorage.setItem('sport_member',name)}catch(e){}
+  calcStats();
+}
+function logout(){
+  loggedIn.value=false;currentMember.value='';connected.value=false;
+  try{localStorage.removeItem('sport_cfg');localStorage.removeItem('sport_member')}catch(e){}
+}
+function genShareLink(){
+  const base=window.location.href.split('?')[0];
+  shareLink.value=base+'?u='+encodeURIComponent(cfg.owner)+'&r='+encodeURIComponent(cfg.repo)+'&t='+encodeURIComponent(cfg.token);
+}
+
+// URL params and auto-connect
+try{
+  const saved=localStorage.getItem('sport_cfg');
+  if(saved){const c=JSON.parse(saved);cfg.owner=c.owner||'';cfg.repo=c.repo||'';cfg.token=c.token||''}
+}catch(e){}
+try{
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('u'))cfg.owner=params.get('u');
+  if(params.get('r'))cfg.repo=params.get('r');
+  if(params.get('t'))cfg.token=params.get('t');
+  if(params.get('u')||params.get('r')||params.get('t')){
+    try{localStorage.setItem('sport_cfg',JSON.stringify({owner:cfg.owner,repo:cfg.repo,token:cfg.token}))}catch(e){}
+    history.replaceState(null,'',window.location.pathname);
+  }
+}catch(e){}
+if(cfg.owner&&cfg.repo&&cfg.token){
+  autoConnecting.value=true;loading.value=true;
+  connect();
+}
+
 function go(v){view.value=v;if(v==='dashboard')calcStats();else if(v==='ranking')calcRank();else if(v==='hero')calcHeroes();else if(v==='manage')filterRecs()}
 
-return{cfg,connected,connecting,cfgError,loading,connect,data,view,saving,form,types,preview,period,rYear,rMonth,rQ,rankList,rInfo,tLabel,heroTab,hYear,hMonth,heroes,newName,fMember,fMonth,filteredRecs,toast,stats,recentRecords,sn,mname,go,navT,onTC,calcRank,calcHeroes,filterRecs,addMember,removeMember,submitRecord,removeRecord,showToast}
+return{cfg,connected,connecting,cfgError,loading,connect,autoConnecting,data,view,saving,form,types,preview,period,rYear,rMonth,rQ,rankList,rInfo,tLabel,heroTab,hYear,hMonth,heroes,newName,fMember,fMonth,filteredRecs,toast,stats,recentRecords,sn,mname,go,navT,onTC,calcRank,calcHeroes,filterRecs,addMember,removeMember,submitRecord,removeRecord,showToast,currentMember,loggedIn,selMemberId,newMemberName2,shareLink,memberLogin,logout,genShareLink}
 }}).mount('#app');
 </script>
 </body>
