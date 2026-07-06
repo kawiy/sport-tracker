@@ -1,626 +1,333 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>运动积分系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        :root{--c:#4f46e5;--cl:#818cf8;--bg:#f3f4f6}
-        *{box-sizing:border-box}
-        body{background:var(--bg);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding-bottom:72px;color:#1f2937}
-        .hdr{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:18px 16px 22px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(79,70,229,.3)}
-        .hdr h5{margin:0;font-size:18px;font-weight:700;letter-spacing:1px}
-        .hdr small{opacity:.75;font-size:12px}
-        .bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 12px rgba(0,0,0,.08);z-index:200;border-top:1px solid #e5e7eb}
-        .bnav .nb{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 2px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:10px;transition:color .2s}
-        .bnav .nb i{font-size:20px;margin-bottom:2px}
-        .bnav .nb.active{color:var(--c);font-weight:600}
-        .pg{padding:16px;max-width:600px;margin:0 auto}
-        .sc{background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-        .sv{font-size:26px;font-weight:800;color:var(--c)}
-        .sl{font-size:12px;color:#6b7280;margin-top:4px}
-        .card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:14px}
-        .ct{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-        .form-control,.form-select{border-radius:10px;border-color:#d1d5db;font-size:15px}
-        .form-control:focus,.form-select:focus{border-color:var(--c);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
-        .form-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:4px}
-        .btn-p{background:var(--c);border-color:var(--c);border-radius:10px;font-weight:600;padding:10px;font-size:15px;color:#fff}
-        .btn-p:hover{background:#4338ca;border-color:#4338ca;color:#fff}
-        .ptabs{display:flex;gap:0;margin-bottom:14px;background:#e5e7eb;border-radius:10px;overflow:hidden}
-        .ptab{flex:1;padding:8px;text-align:center;border:none;background:transparent;font-size:14px;font-weight:500;cursor:pointer;color:#6b7280}
-        .ptab.active{background:var(--c);color:#fff;font-weight:600}
-        .tnav{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:14px}
-        .tnav .lb{font-size:17px;font-weight:700;min-width:120px;text-align:center}
-        .tnav button{background:none;border:2px solid #d1d5db;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#6b7280}
-        .tnav button:hover{border-color:var(--c);color:var(--c)}
-        .rt{width:100%;border-collapse:separate;border-spacing:0 6px}
-        .rt th{font-size:12px;color:#9ca3af;font-weight:500;padding:2px 8px 6px;border:none}
-        .rr{background:#f9fafb;border-radius:10px}
-        .rr td{padding:10px 8px;border:none;vertical-align:middle}
-        .rr td:first-child{border-radius:10px 0 0 10px;width:44px;text-align:center}
-        .rr td:last-child{border-radius:0 10px 10px 0;text-align:right}
-        .rr.t1{background:linear-gradient(90deg,#fef3c7,#fffbeb)}
-        .rr.t2{background:linear-gradient(90deg,#e5e7eb,#f9fafb)}
-        .rr.t3{background:linear-gradient(90deg,#fde8d8,#fef9f5)}
-        .md{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
-        .md1{background:linear-gradient(135deg,#f59e0b,#d97706)}
-        .md2{background:linear-gradient(135deg,#9ca3af,#6b7280)}
-        .md3{background:linear-gradient(135deg,#d97706,#92400e)}
-        .mdn{background:#e5e7eb;color:#6b7280}
-        .pb{background:var(--c);color:#fff;padding:4px 12px;border-radius:20px;font-weight:700;font-size:13px}
-        .hc{background:#fff;border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px}
-        .hc.t1{background:linear-gradient(135deg,#fef3c7,#fffbeb);border-left:4px solid #f59e0b}
-        .hc.t2{background:linear-gradient(135deg,#e5e7eb,#f9fafb);border-left:4px solid #9ca3af}
-        .hc.t3{background:linear-gradient(135deg,#fde8d8,#fef9f5);border-left:4px solid #d97706}
-        .ha{width:42px;height:42px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
-        .ri{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f9fafb;border-radius:10px;margin-bottom:8px}
-        .tt{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
-        .tt1{background:#fef3c7;color:#92400e}.tt2{background:#d1fae5;color:#065f46}.tt3{background:#dbeafe;color:#1e40af}
-        .tt4{background:#fce7f3;color:#9d174d}.tt5{background:#e0e7ff;color:#3730a3}.tt6{background:#ccfbf1;color:#134e4a}
-        .mc{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f3f4f6;border-radius:20px;margin:4px;font-size:14px}
-        .mc .dl{cursor:pointer;color:#9ca3af;font-size:12px}.mc .dl:hover{color:#ef4444}
-        .es{text-align:center;padding:36px 16px;color:#9ca3af}
-        .es i{font-size:42px;margin-bottom:10px;display:block}
-        .tb{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999}
-        .setup-box{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin:40px auto;max-width:500px}
-        .setup-box h4{font-weight:700;margin-bottom:16px}
-        .setup-box code{background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:13px}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>运动积分系统</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root{--c:#4f46e5;--bg:#f3f4f6}
+*{box-sizing:border-box}
+body{background:var(--bg);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding-bottom:72px;color:#1f2937}
+.hdr{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:18px 16px 22px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(79,70,229,.3)}
+.hdr h5{margin:0;font-size:18px;font-weight:700;letter-spacing:1px}
+.hdr small{opacity:.75;font-size:12px}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 12px rgba(0,0,0,.08);z-index:200;border-top:1px solid #e5e7eb}
+.bnav .nb{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 2px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:10px}
+.bnav .nb i{font-size:20px;margin-bottom:2px}
+.bnav .nb.active{color:var(--c);font-weight:600}
+.pg{padding:16px;max-width:600px;margin:0 auto}
+.sc{background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.sv{font-size:26px;font-weight:800;color:var(--c)}.sl{font-size:12px;color:#6b7280;margin-top:4px}
+.card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:14px}
+.ct{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.form-control,.form-select{border-radius:10px;border-color:#d1d5db;font-size:15px}
+.form-control:focus,.form-select:focus{border-color:var(--c);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+.form-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:4px}
+.btn-p{background:var(--c);border-color:var(--c);border-radius:10px;font-weight:600;padding:10px;font-size:15px;color:#fff}
+.btn-p:hover{background:#4338ca;border-color:#4338ca;color:#fff}
+.ptabs{display:flex;gap:0;margin-bottom:14px;background:#e5e7eb;border-radius:10px;overflow:hidden}
+.ptab{flex:1;padding:8px;text-align:center;border:none;background:transparent;font-size:14px;font-weight:500;cursor:pointer;color:#6b7280}
+.ptab.active{background:var(--c);color:#fff;font-weight:600}
+.tnav{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:14px}
+.tnav .lb{font-size:17px;font-weight:700;min-width:120px;text-align:center}
+.tnav button{background:none;border:2px solid #d1d5db;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#6b7280}
+.tnav button:hover{border-color:var(--c);color:var(--c)}
+.rt{width:100%;border-collapse:separate;border-spacing:0 6px}
+.rt th{font-size:12px;color:#9ca3af;font-weight:500;padding:2px 8px 6px;border:none}
+.rr{background:#f9fafb;border-radius:10px}
+.rr td{padding:10px 8px;border:none;vertical-align:middle}
+.rr td:first-child{border-radius:10px 0 0 10px;width:44px;text-align:center}
+.rr td:last-child{border-radius:0 10px 10px 0;text-align:right}
+.rr.t1{background:linear-gradient(90deg,#fef3c7,#fffbeb)}
+.rr.t2{background:linear-gradient(90deg,#e5e7eb,#f9fafb)}
+.rr.t3{background:linear-gradient(90deg,#fde8d8,#fef9f5)}
+.md{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.md1{background:linear-gradient(135deg,#f59e0b,#d97706)}.md2{background:linear-gradient(135deg,#9ca3af,#6b7280)}.md3{background:linear-gradient(135deg,#d97706,#92400e)}.mdn{background:#e5e7eb;color:#6b7280}
+.pb{background:var(--c);color:#fff;padding:4px 12px;border-radius:20px;font-weight:700;font-size:13px}
+.hc{background:#fff;border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px}
+.hc.t1{background:linear-gradient(135deg,#fef3c7,#fffbeb);border-left:4px solid #f59e0b}
+.hc.t2{background:linear-gradient(135deg,#e5e7eb,#f9fafb);border-left:4px solid #9ca3af}
+.hc.t3{background:linear-gradient(135deg,#fde8d8,#fef9f5);border-left:4px solid #d97706}
+.ha{width:42px;height:42px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.ri{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f9fafb;border-radius:10px;margin-bottom:8px}
+.tt{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.tt1{background:#fef3c7;color:#92400e}.tt2{background:#d1fae5;color:#065f46}.tt3{background:#dbeafe;color:#1e40af}
+.tt4{background:#fce7f3;color:#9d174d}.tt5{background:#e0e7ff;color:#3730a3}.tt6{background:#ccfbf1;color:#134e4a}
+.mc{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f3f4f6;border-radius:20px;margin:4px;font-size:14px}
+.mc .dl{cursor:pointer;color:#9ca3af;font-size:12px}.mc .dl:hover{color:#ef4444}
+.es{text-align:center;padding:36px 16px;color:#9ca3af}
+.es i{font-size:42px;margin-bottom:10px;display:block}
+.tb{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999}
+.setup-box{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin:40px auto;max-width:500px}
+.setup-box h4{font-weight:700;margin-bottom:16px}
+.ld{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.85);z-index:9998;display:flex;align-items:center;justify-content:center}
+.ld .spinner-border{width:3rem;height:3rem}
+</style>
 </head>
 <body>
 <div id="app">
-    <!-- Setup Screen -->
-    <div v-if="!connected">
-        <div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>Supabase 云端版</small></div>
-        <div class="setup-box">
-            <h4><i class="bi bi-gear"></i> 初始化配置</h4>
-            <p style="font-size:14px;color:#6b7280">请输入你的 Supabase 项目信息：</p>
-            <div class="mb-3">
-                <label class="form-label">Project URL</label>
-                <input type="text" class="form-control" v-model="cfg.url" placeholder="https://xxxxx.supabase.co">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Anon Public Key</label>
-                <input type="text" class="form-control" v-model="cfg.key" placeholder="eyJhbGciOi...">
-            </div>
-            <button class="btn btn-p w-100" @click="connect" :disabled="connecting">
-                <span v-if="connecting"><i class="bi bi-hourglass-split"></i> 连接中…</span>
-                <span v-else><i class="bi bi-plug"></i> 连接 Supabase</span>
-            </button>
-            <div v-if="cfgError" class="alert alert-danger mt-3 py-2" style="border-radius:10px;font-size:13px">{{ cfgError }}</div>
-        </div>
-    </div>
+<!-- Loading -->
+<div v-if="loading" class="ld"><div class="text-center"><div class="spinner-border text-primary"></div><div class="mt-3" style="color:#6b7280">加载数据中…</div></div></div>
 
-    <!-- Main App -->
-    <template v-if="connected">
-        <div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>健康生活 · 快乐运动</small></div>
-        <div class="pg">
+<!-- Setup -->
+<div v-if="!connected && !loading">
+<div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>GitHub 云端版</small></div>
+<div class="setup-box">
+<h4><i class="bi bi-github"></i> 连接 GitHub</h4>
+<p style="font-size:14px;color:#6b7280">输入你的 GitHub 仓库信息和访问令牌：</p>
+<div class="mb-3"><label class="form-label">GitHub 用户名</label><input class="form-control" v-model="cfg.owner" placeholder="如：zhangsan"></div>
+<div class="mb-3"><label class="form-label">仓库名</label><input class="form-control" v-model="cfg.repo" placeholder="如：sport-tracker"></div>
+<div class="mb-3"><label class="form-label">Personal Access Token</label><input class="form-control" v-model="cfg.token" type="password" placeholder="ghp_xxxxxxxxxxxx"><small style="font-size:12px;color:#9ca3af">需要 repo 权限。<a href="https://github.com/settings/tokens/new?scopes=repo&description=Sport+Tracker" target="_blank">点此创建</a></small></div>
+<button class="btn btn-p w-100" @click="connect" :disabled="connecting"><span v-if="connecting"><i class="bi bi-hourglass-split"></i> 连接中…</span><span v-else><i class="bi bi-plug"></i> 连接</span></button>
+<div v-if="cfgError" class="alert alert-danger mt-3 py-2" style="border-radius:10px;font-size:13px">{{ cfgError }}</div>
+</div>
+</div>
 
-            <!-- Dashboard -->
-            <div v-if="view==='dashboard'">
-                <div class="row g-2 mt-3 mb-3">
-                    <div class="col-3"><div class="sc"><div class="sv">{{ stats.totalMembers }}</div><div class="sl">总人数</div></div></div>
-                    <div class="col-3"><div class="sc"><div class="sv">{{ stats.monthActive }}</div><div class="sl">本月活跃</div></div></div>
-                    <div class="col-3"><div class="sc"><div class="sv">{{ stats.monthRecords }}</div><div class="sl">本月打卡</div></div></div>
-                    <div class="col-3"><div class="sc"><div class="sv">{{ stats.monthPoints }}</div><div class="sl">本月积分</div></div></div>
-                </div>
-                <div class="card">
-                    <div class="ct"><i class="bi bi-clock-history"></i> 最近打卡</div>
-                    <div v-if="!recentRecords.length" class="es"><i class="bi bi-clipboard-data"></i>暂无打卡记录</div>
-                    <div v-for="r in recentRecords" :key="r.id" class="ri">
-                        <div>
-                            <div style="font-weight:600;font-size:14px">{{ memberName(r.member_id) }}</div>
-                            <div style="font-size:12px;color:#9ca3af">
-                                <span :class="'tt tt'+r.exercise_type">{{ sportName(r.exercise_type) }}</span> {{ r.exercise_date }}
-                            </div>
-                        </div>
-                        <div class="pb">+{{ r.points }}分</div>
-                    </div>
-                </div>
-            </div>
+<!-- Main -->
+<template v-if="connected && !loading">
+<div class="hdr"><h5><i class="bi bi-trophy"></i> 运动积分系统</h5><small>健康生活 · 快乐运动</small></div>
+<div class="pg">
 
-            <!-- Check-in -->
-            <div v-if="view==='checkin'">
-                <div class="card mt-3">
-                    <div class="ct"><i class="bi bi-plus-circle"></i> 记录运动</div>
-                    <form @submit.prevent="submitRecord">
-                        <div class="mb-3">
-                            <label class="form-label">姓名</label>
-                            <select class="form-select" v-model="form.member_id" required>
-                                <option value="">-- 选择成员 --</option>
-                                <option v-for="m in members" :key="m.id" :value="m.id">{{ m.name }}</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">运动日期</label>
-                            <input type="date" class="form-control" v-model="form.exercise_date" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">运动类型</label>
-                            <select class="form-select" v-model="form.exercise_type" required @change="onTypeChange">
-                                <option value="">-- 选择类型 --</option>
-                                <option v-for="t in sportTypes" :key="t.id" :value="t.id">{{ t.name }} ({{ t.desc }})</option>
-                            </select>
-                        </div>
-                        <div class="mb-3" v-if="form.exercise_type==1||form.exercise_type==3">
-                            <label class="form-label">距离（公里）</label>
-                            <input type="number" class="form-control" v-model.number="form.distance" step="0.1" min="0" placeholder="如：3.5">
-                        </div>
-                        <div class="mb-3" v-if="form.exercise_type==2">
-                            <label class="form-label">步数</label>
-                            <input type="number" class="form-control" v-model.number="form.steps" min="0" placeholder="如：12000">
-                        </div>
-                        <div class="mb-3" v-if="form.exercise_type>=4">
-                            <label class="form-label">时长（分钟）</label>
-                            <input type="number" class="form-control" v-model.number="form.duration" min="0" placeholder="如：45">
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" v-model="form.is_team" id="ts">
-                                <label class="form-check-label" for="ts"><i class="bi bi-people-fill text-primary"></i> 团队运动（≥3人，积分翻倍）</label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">备注（可选）</label>
-                            <input type="text" class="form-control" v-model="form.note" placeholder="如：羽毛球双打">
-                        </div>
-                        <div v-if="previewPoints>0" class="alert alert-success py-2" style="border-radius:10px;font-size:14px">
-                            <i class="bi bi-star-fill"></i> 预计获得 <strong>{{ previewPoints }}</strong> 积分
-                        </div>
-                        <button type="submit" class="btn btn-p w-100" :disabled="submitting">
-                            <span v-if="submitting"><i class="bi bi-hourglass-split"></i> 提交中…</span>
-                            <span v-else><i class="bi bi-check2-circle"></i> 提交打卡</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
+<!-- Dashboard -->
+<div v-if="view==='dashboard'">
+<div class="row g-2 mt-3 mb-3">
+<div class="col-3"><div class="sc"><div class="sv">{{ stats.totalMembers }}</div><div class="sl">总人数</div></div></div>
+<div class="col-3"><div class="sc"><div class="sv">{{ stats.monthActive }}</div><div class="sl">本月活跃</div></div></div>
+<div class="col-3"><div class="sc"><div class="sv">{{ stats.monthRecords }}</div><div class="sl">本月打卡</div></div></div>
+<div class="col-3"><div class="sc"><div class="sv">{{ stats.monthPoints }}</div><div class="sl">本月积分</div></div></div>
+</div>
+<div class="card"><div class="ct"><i class="bi bi-clock-history"></i> 最近打卡</div>
+<div v-if="!recentRecords.length" class="es"><i class="bi bi-clipboard-data"></i>暂无打卡记录</div>
+<div v-for="r in recentRecords" :key="r.id" class="ri"><div><div style="font-weight:600;font-size:14px">{{ mname(r.member_id) }}</div><div style="font-size:12px;color:#9ca3af"><span :class="'tt tt'+r.exercise_type">{{ sn(r.exercise_type) }}</span> {{ r.exercise_date }}</div></div><div class="pb">+{{ r.points }}分</div></div>
+</div></div>
 
-            <!-- Rankings -->
-            <div v-if="view==='ranking'">
-                <div class="ptabs mt-3">
-                    <button class="ptab" :class="{active:period==='monthly'}" @click="period='monthly';loadRanking()">月度</button>
-                    <button class="ptab" :class="{active:period==='quarterly'}" @click="period='quarterly';loadRanking()">季度</button>
-                    <button class="ptab" :class="{active:period==='annual'}" @click="period='annual';loadRanking()">年度</button>
-                </div>
-                <div class="tnav">
-                    <button @click="navTime(-1)"><i class="bi bi-chevron-left"></i></button>
-                    <span class="lb">{{ timeLabel }}</span>
-                    <button @click="navTime(1)"><i class="bi bi-chevron-right"></i></button>
-                </div>
-                <div class="d-flex justify-content-between px-1 mb-3">
-                    <small style="color:#6b7280">参与率 {{ rankingInfo.rate }}%</small>
-                    <small style="color:#6b7280">{{ rankingInfo.active }}/{{ rankingInfo.total }}人参与</small>
-                </div>
-                <div v-if="!rankings.length" class="es"><i class="bi bi-bar-chart"></i>暂无排名数据</div>
-                <table v-else class="rt">
-                    <thead><tr><th>#</th><th>姓名</th><th style="text-align:right">积分</th></tr></thead>
-                    <tbody>
-                        <tr v-for="r in rankings" :key="r.member_id" class="rr" :class="{'t1':r.rank===1,'t2':r.rank===2,'t3':r.rank===3}">
-                            <td><span class="md" :class="{'md1':r.rank===1,'md2':r.rank===2,'md3':r.rank===3,'mdn':r.rank>3}">{{ r.rank }}</span></td>
-                            <td><div style="font-weight:600;font-size:14px">{{ r.name }}</div><div style="font-size:11px;color:#9ca3af">运动{{ r.days }}天</div></td>
-                            <td><span class="pb">{{ r.points }}</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<!-- Check-in -->
+<div v-if="view==='checkin'">
+<div class="card mt-3"><div class="ct"><i class="bi bi-plus-circle"></i> 记录运动</div>
+<form @submit.prevent="submitRecord">
+<div class="mb-3"><label class="form-label">姓名</label><select class="form-select" v-model="form.member_id" required><option value="">-- 选择成员 --</option><option v-for="m in data.members" :key="m.id" :value="m.id">{{ m.name }}</option></select></div>
+<div class="mb-3"><label class="form-label">运动日期</label><input type="date" class="form-control" v-model="form.exercise_date" required></div>
+<div class="mb-3"><label class="form-label">运动类型</label><select class="form-select" v-model="form.exercise_type" required @change="onTC"><option value="">-- 选择类型 --</option><option v-for="t in types" :key="t.id" :value="t.id">{{ t.name }} ({{ t.desc }})</option></select></div>
+<div class="mb-3" v-if="form.exercise_type==1||form.exercise_type==3"><label class="form-label">距离（公里）</label><input type="number" class="form-control" v-model.number="form.distance" step="0.1" min="0" placeholder="如：3.5"></div>
+<div class="mb-3" v-if="form.exercise_type==2"><label class="form-label">步数</label><input type="number" class="form-control" v-model.number="form.steps" min="0" placeholder="如：12000"></div>
+<div class="mb-3" v-if="form.exercise_type>=4"><label class="form-label">时长（分钟）</label><input type="number" class="form-control" v-model.number="form.duration" min="0" placeholder="如：45"></div>
+<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" v-model="form.is_team" id="ts"><label class="form-check-label" for="ts"><i class="bi bi-people-fill text-primary"></i> 团队运动（≥3人，积分翻倍）</label></div></div>
+<div class="mb-3"><label class="form-label">备注（可选）</label><input type="text" class="form-control" v-model="form.note" placeholder="如：羽毛球双打"></div>
+<div v-if="preview>0" class="alert alert-success py-2" style="border-radius:10px;font-size:14px"><i class="bi bi-star-fill"></i> 预计获得 <strong>{{ preview }}</strong> 积分</div>
+<button type="submit" class="btn btn-p w-100" :disabled="saving"><span v-if="saving"><i class="bi bi-hourglass-split"></i> 保存中…</span><span v-else><i class="bi bi-check2-circle"></i> 提交打卡</span></button>
+</form></div></div>
 
-            <!-- Hero -->
-            <div v-if="view==='hero'">
-                <div class="ptabs mt-3">
-                    <button class="ptab" :class="{active:heroTab==='monthly'}" @click="heroTab='monthly';loadHeroes()">月度英雄榜</button>
-                    <button class="ptab" :class="{active:heroTab==='quarterly'}" @click="heroTab='quarterly';loadQBonus()">季度激励</button>
-                    <button class="ptab" :class="{active:heroTab==='annual'}" @click="heroTab='annual';loadABonus()">年度激励</button>
-                </div>
-                <!-- Monthly Heroes -->
-                <div v-if="heroTab==='monthly'">
-                    <div class="tnav">
-                        <button @click="heroMonth--;if(heroMonth<1){heroMonth=12;heroYear--};loadHeroes()"><i class="bi bi-chevron-left"></i></button>
-                        <span class="lb">{{ heroYear }}年{{ heroMonth }}月</span>
-                        <button @click="heroMonth++;if(heroMonth>12){heroMonth=1;heroYear++};loadHeroes()"><i class="bi bi-chevron-right"></i></button>
-                    </div>
-                    <div class="ct px-1"><i class="bi bi-trophy-fill" style="color:#f59e0b"></i> TOP 10 运动英雄</div>
-                    <div v-if="!heroes.length" class="es"><i class="bi bi-award"></i>暂无数据</div>
-                    <div v-for="(h,i) in heroes" :key="i" class="hc" :class="{'t1':i===0,'t2':i===1,'t3':i===2}">
-                        <div class="ha" :style="i>=3?'background:#9ca3af':''">{{ h.name[0] }}</div>
-                        <div style="flex:1"><div style="font-weight:700;font-size:15px">{{ h.name }}</div><div style="font-size:12px;color:#6b7280">运动{{ h.days }}天</div></div>
-                        <span class="pb">{{ h.points }}分</span>
-                    </div>
-                </div>
-                <!-- Quarterly / Annual bonus sections similar structure -->
-                <div v-if="heroTab==='quarterly'||heroTab==='annual'" class="card mt-3">
-                    <div class="ct"><i class="bi bi-info-circle"></i> 奖金计算</div>
-                    <p style="font-size:14px;color:#6b7280">季度/年度激励的参与率和奖金池数据基于排名页面的统计自动计算。</p>
-                    <p style="font-size:14px">请查看「排名」页面获取详细的积分数据，结合以下规则计算奖金：</p>
-                    <ul style="font-size:13px;color:#374151;padding-left:20px">
-                        <li>季度：预算500元/季 × 参与率系数（&lt;50%打5折、50-70%打8折、&gt;70%全额）</li>
-                        <li>运动之星3名×100元、进步之星2名×50元、抽奖2名×50元</li>
-                        <li>年度：预算2000元/年 × 参与率系数，门槛≥8个月</li>
-                        <li>一等奖2名×168元、二等奖3名×128元、三等奖5名×88元、抽奖约10名×88元</li>
-                    </ul>
-                </div>
-            </div>
+<!-- Rankings -->
+<div v-if="view==='ranking'">
+<div class="ptabs mt-3"><button class="ptab" :class="{active:period==='m'}" @click="period='m';calcRank()">月度</button><button class="ptab" :class="{active:period==='q'}" @click="period='q';calcRank()">季度</button><button class="ptab" :class="{active:period==='a'}" @click="period='a';calcRank()">年度</button></div>
+<div class="tnav"><button @click="navT(-1)"><i class="bi bi-chevron-left"></i></button><span class="lb">{{ tLabel }}</span><button @click="navT(1)"><i class="bi bi-chevron-right"></i></button></div>
+<div class="d-flex justify-content-between px-1 mb-3"><small style="color:#6b7280">参与率 {{ rInfo.rate }}%</small><small style="color:#6b7280">{{ rInfo.active }}/{{ rInfo.total }}人</small></div>
+<div v-if="!rankList.length" class="es"><i class="bi bi-bar-chart"></i>暂无数据</div>
+<table v-else class="rt"><thead><tr><th>#</th><th>姓名</th><th style="text-align:right">积分</th></tr></thead><tbody>
+<tr v-for="r in rankList" :key="r.mid" class="rr" :class="{'t1':r.rank===1,'t2':r.rank===2,'t3':r.rank===3}"><td><span class="md" :class="{'md1':r.rank===1,'md2':r.rank===2,'md3':r.rank===3,'mdn':r.rank>3}">{{ r.rank }}</span></td><td><div style="font-weight:600;font-size:14px">{{ r.name }}</div><div style="font-size:11px;color:#9ca3af">运动{{ r.days }}天</div></td><td><span class="pb">{{ r.pts }}</span></td></tr>
+</tbody></table></div>
 
-            <!-- Manage -->
-            <div v-if="view==='manage'">
-                <div class="card mt-3">
-                    <div class="ct"><i class="bi bi-people"></i> 成员管理</div>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" v-model="newName" placeholder="输入姓名" @keyup.enter="addMember" style="border-radius:10px 0 0 10px">
-                        <button class="btn btn-p" @click="addMember" style="border-radius:0 10px 10px 0;padding:8px 16px"><i class="bi bi-plus"></i></button>
-                    </div>
-                    <div v-if="!members.length" class="es" style="padding:12px"><i class="bi bi-person-plus" style="font-size:24px"></i>请先添加成员</div>
-                    <div v-else><span v-for="m in members" :key="m.id" class="mc">{{ m.name }} <i class="bi bi-x dl" @click="removeMember(m.id)"></i></span></div>
-                </div>
-                <div class="card">
-                    <div class="ct"><i class="bi bi-list-ul"></i> 打卡记录</div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <select class="form-select form-select-sm" v-model="filterMember" @change="loadAllRecords" style="font-size:13px">
-                                <option value="">全部成员</option>
-                                <option v-for="m in members" :key="m.id" :value="m.id">{{ m.name }}</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <input type="month" class="form-control form-control-sm" v-model="filterMonth" @change="loadAllRecords" style="font-size:13px">
-                        </div>
-                    </div>
-                    <div v-if="!allRecords.length" class="es"><i class="bi bi-clipboard"></i>暂无记录</div>
-                    <div v-for="r in allRecords" :key="r.id" class="ri">
-                        <div>
-                            <div style="font-weight:600;font-size:14px">{{ memberName(r.member_id) }} <i v-if="r.is_team" class="bi bi-people-fill text-primary" style="font-size:12px"></i></div>
-                            <div style="font-size:12px;color:#9ca3af">
-                                <span :class="'tt tt'+r.exercise_type">{{ sportName(r.exercise_type) }}</span> {{ r.exercise_date }}
-                                <span v-if="r.distance>0"> · {{ r.distance }}km</span>
-                                <span v-if="r.steps>0"> · {{ r.steps }}步</span>
-                                <span v-if="r.duration>0"> · {{ r.duration }}分钟</span>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="pb">{{ r.points }}分</span>
-                            <i class="bi bi-trash3 text-muted" style="cursor:pointer;font-size:14px" @click="removeRecord(r.id)"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Hero -->
+<div v-if="view==='hero'">
+<div class="ptabs mt-3"><button class="ptab" :class="{active:heroTab==='m'}" @click="heroTab='m';calcHeroes()">月度英雄榜</button><button class="ptab" :class="{active:heroTab==='q'}" @click="heroTab='q'">季度激励</button><button class="ptab" :class="{active:heroTab==='a'}" @click="heroTab='a'">年度激励</button></div>
+<div v-if="heroTab==='m'">
+<div class="tnav"><button @click="hMonth--;if(hMonth<1){hMonth=12;hYear--};calcHeroes()"><i class="bi bi-chevron-left"></i></button><span class="lb">{{ hYear }}年{{ hMonth }}月</span><button @click="hMonth++;if(hMonth>12){hMonth=1;hYear++};calcHeroes()"><i class="bi bi-chevron-right"></i></button></div>
+<div class="ct px-1"><i class="bi bi-trophy-fill" style="color:#f59e0b"></i> TOP 10</div>
+<div v-if="!heroes.length" class="es"><i class="bi bi-award"></i>暂无数据</div>
+<div v-for="(h,i) in heroes" :key="i" class="hc" :class="{'t1':i===0,'t2':i===1,'t3':i===2}"><div class="ha" :style="i>=3?'background:#9ca3af':''">{{ h.name[0] }}</div><div style="flex:1"><div style="font-weight:700;font-size:15px">{{ h.name }}</div><div style="font-size:12px;color:#6b7280">运动{{ h.days }}天</div></div><span class="pb">{{ h.pts }}分</span></div>
+</div>
+<div v-if="heroTab==='q'||heroTab==='a'" class="card mt-3"><div class="ct"><i class="bi bi-info-circle"></i> 奖金规则</div>
+<ul style="font-size:13px;color:#374151;padding-left:20px;line-height:2">
+<li>季度预算500元/季 × 参与率系数（&lt;50%打5折、50-70%打8折、&gt;70%全额）</li>
+<li>运动之星3名×100元、进步之星2名×50元、抽奖2名×50元</li>
+<li>年度预算2000元/年 × 参与率系数，门槛≥8个月</li>
+<li>一等奖2名×168元、二等奖3名×128元、三等奖5名×88元、抽奖约10名×88元</li></ul></div>
+</div>
 
-        </div><!-- /pg -->
+<!-- Manage -->
+<div v-if="view==='manage'">
+<div class="card mt-3"><div class="ct"><i class="bi bi-people"></i> 成员管理</div>
+<div class="input-group mb-3"><input class="form-control" v-model="newName" placeholder="输入姓名" @keyup.enter="addMember" style="border-radius:10px 0 0 10px"><button class="btn btn-p" @click="addMember" style="border-radius:0 10px 10px 0;padding:8px 16px"><i class="bi bi-plus"></i></button></div>
+<div v-if="!data.members.length" class="es" style="padding:12px"><i class="bi bi-person-plus" style="font-size:24px"></i>请先添加成员</div>
+<div v-else><span v-for="m in data.members" :key="m.id" class="mc">{{ m.name }} <i class="bi bi-x dl" @click="removeMember(m.id)"></i></span></div>
+</div>
+<div class="card"><div class="ct"><i class="bi bi-list-ul"></i> 打卡记录</div>
+<div class="row g-2 mb-3"><div class="col-6"><select class="form-select form-select-sm" v-model="fMember" @change="filterRecs" style="font-size:13px"><option value="">全部成员</option><option v-for="m in data.members" :key="m.id" :value="m.id">{{ m.name }}</option></select></div><div class="col-6"><input type="month" class="form-control form-control-sm" v-model="fMonth" @change="filterRecs" style="font-size:13px"></div></div>
+<div v-if="!filteredRecs.length" class="es"><i class="bi bi-clipboard"></i>暂无记录</div>
+<div v-for="r in filteredRecs" :key="r.id" class="ri"><div><div style="font-weight:600;font-size:14px">{{ mname(r.member_id) }} <i v-if="r.is_team" class="bi bi-people-fill text-primary" style="font-size:12px"></i></div><div style="font-size:12px;color:#9ca3af"><span :class="'tt tt'+r.exercise_type">{{ sn(r.exercise_type) }}</span> {{ r.exercise_date }}<span v-if="r.distance"> · {{r.distance}}km</span><span v-if="r.steps"> · {{r.steps}}步</span><span v-if="r.duration"> · {{r.duration}}分钟</span></div></div><div class="d-flex align-items-center gap-2"><span class="pb">{{ r.points }}分</span><i class="bi bi-trash3 text-muted" style="cursor:pointer" @click="removeRecord(r.id)"></i></div></div>
+</div></div>
 
-        <!-- Bottom Nav -->
-        <div class="bnav">
-            <button class="nb" :class="{active:view==='dashboard'}" @click="go('dashboard')"><i class="bi bi-house"></i><span>首页</span></button>
-            <button class="nb" :class="{active:view==='checkin'}" @click="go('checkin')"><i class="bi bi-plus-circle"></i><span>打卡</span></button>
-            <button class="nb" :class="{active:view==='ranking'}" @click="go('ranking')"><i class="bi bi-bar-chart"></i><span>排名</span></button>
-            <button class="nb" :class="{active:view==='hero'}" @click="go('hero')"><i class="bi bi-trophy"></i><span>英雄榜</span></button>
-            <button class="nb" :class="{active:view==='manage'}" @click="go('manage')"><i class="bi bi-gear"></i><span>管理</span></button>
-        </div>
-    </template>
+</div>
+<div class="bnav">
+<button class="nb" :class="{active:view==='dashboard'}" @click="go('dashboard')"><i class="bi bi-house"></i><span>首页</span></button>
+<button class="nb" :class="{active:view==='checkin'}" @click="go('checkin')"><i class="bi bi-plus-circle"></i><span>打卡</span></button>
+<button class="nb" :class="{active:view==='ranking'}" @click="go('ranking')"><i class="bi bi-bar-chart"></i><span>排名</span></button>
+<button class="nb" :class="{active:view==='hero'}" @click="go('hero')"><i class="bi bi-trophy"></i><span>英雄榜</span></button>
+<button class="nb" :class="{active:view==='manage'}" @click="go('manage')"><i class="bi bi-gear"></i><span>管理</span></button>
+</div>
+</template>
 
-    <!-- Toast -->
-    <div v-if="toast.show" class="tb">
-        <div class="alert" :class="'alert-'+toast.type" style="padding:10px 20px;border-radius:10px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.15);margin:0">{{ toast.msg }}</div>
-    </div>
+<div v-if="toast.show" class="tb"><div class="alert" :class="'alert-'+toast.type" style="padding:10px 20px;border-radius:10px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.15);margin:0">{{ toast.msg }}</div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
-const now = new Date();
+const{createApp,ref,reactive,computed,onMounted}=Vue,now=new Date;
+createApp({setup(){
+// Config
+const cfg=reactive({owner:'',repo:'',token:''}),connected=ref(false),connecting=ref(false),cfgError=ref(''),loading=ref(false);
+const data=reactive({members:[],records:[]});
+let sha=''; // data.json SHA for GitHub API updates
 
-createApp({
-    setup() {
-        // ---- Config ----
-        const cfg = reactive({ url: '', key: '' });
-        const connected = ref(false);
-        const connecting = ref(false);
-        const cfgError = ref('');
-        let sb = null; // Supabase client
+// State
+const view=ref('dashboard'),saving=ref(false);
+const form=reactive({member_id:'',exercise_date:now.toISOString().slice(0,10),exercise_type:'',distance:0,steps:0,duration:0,is_team:false,note:''});
+const types=[{id:1,name:'跑步',desc:'≥2km，1分/2km'},{id:2,name:'健走/步行',desc:'≥10000步，1分/次'},{id:3,name:'骑行',desc:'≥5km，1分/5km'},{id:4,name:'健身/力量',desc:'≥30分钟，1分/次'},{id:5,name:'球类/游泳/瑜伽',desc:'≥30分钟，1分/次'},{id:6,name:'团队运动',desc:'≥30分钟，翻倍'}];
+const period=ref('m'),rYear=ref(now.getFullYear()),rMonth=ref(now.getMonth()+1),rQ=ref(Math.floor(now.getMonth()/3)+1);
+const rankList=ref([]),rInfo=reactive({rate:0,active:0,total:0});
+const heroTab=ref('m'),hYear=ref(now.getFullYear()),hMonth=ref(now.getMonth()+1),heroes=ref([]);
+const newName=ref(''),fMember=ref(''),fMonth=ref(''),filteredRecs=ref([]);
+const toast=reactive({show:false,msg:'',type:'success'});
+function showToast(m,t='success'){toast.msg=m;toast.type=t;toast.show=true;setTimeout(()=>{toast.show=false},2500)}
 
-        // ---- State ----
-        const view = ref('dashboard');
-        const members = ref([]);
-        const recentRecords = ref([]);
-        const stats = reactive({ totalMembers: 0, monthActive: 0, monthRecords: 0, monthPoints: 0 });
+// Helpers
+function sn(t){return{1:'跑步',2:'健走/步行',3:'骑行',4:'健身/力量',5:'球类/游泳/瑜伽',6:'团队运动'}[t]||'未知'}
+function mname(id){const m=data.members.find(x=>x.id===id);return m?m.name:'未知'}
+function calcPts(t,d,s,dur,team){const i={1:{f:'d',th:2,r:.5},2:{f:'s',th:10000,r:1},3:{f:'d',th:5,r:.2},4:{f:'t',th:30,r:1},5:{f:'t',th:30,r:1},6:{f:'t',th:30,r:1}}[t];if(!i)return 0;const v=i.f==='d'?d:i.f==='s'?s:dur;if(v<i.th)return 0;let p=i.f==='d'?Math.floor(v/i.th)*(i.th*i.r):i.r;if(team)p*=2;return p}
 
-        // ---- Form ----
-        const form = reactive({ member_id:'', exercise_date:now.toISOString().slice(0,10), exercise_type:'', distance:0, steps:0, duration:0, is_team:false, note:'' });
-        const submitting = ref(false);
-        const sportTypes = [
-            { id:1, name:'跑步', desc:'≥2km，1分/2km' },
-            { id:2, name:'健走/步行', desc:'≥10000步，1分/次' },
-            { id:3, name:'骑行', desc:'≥5km，1分/5km' },
-            { id:4, name:'健身/力量', desc:'≥30分钟，1分/次' },
-            { id:5, name:'球类/游泳/瑜伽', desc:'≥30分钟，1分/次' },
-            { id:6, name:'团队运动', desc:'≥30分钟，积分翻倍' },
-        ];
+// GitHub API
+async function ghFetch(){
+  const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json`,{headers:{Authorization:`token ${cfg.token}`}});
+  if(!r.ok)throw new Error(r.status===404?'data.json 不存在（将自动创建）':('HTTP '+r.status));
+  const j=await r.json();sha=j.sha;
+  return JSON.parse(decodeURIComponent(escape(atob(j.content))));
+}
+async function ghSave(obj,msg){
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+  const body={message:msg||'Update data',content,branch:'main'};
+  if(sha)body.sha=sha;
+  const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json`,{method:'PUT',headers:{Authorization:`token ${cfg.token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json();throw new Error(e.message||'Save failed')}
+  const j=await r.json();sha=j.content.sha;
+}
 
-        // ---- Rankings ----
-        const period = ref('monthly');
-        const rYear = ref(now.getFullYear());
-        const rMonth = ref(now.getMonth()+1);
-        const rQuarter = ref(Math.floor(now.getMonth()/3)+1);
-        const rankings = ref([]);
-        const rankingInfo = reactive({ rate:0, active:0, total:0 });
+// Connect
+async function connect(){
+  if(!cfg.owner||!cfg.repo||!cfg.token){cfgError.value='请填写完整';return}
+  connecting.value=true;cfgError.value='';
+  try{
+    const d=await ghFetch();
+    data.members=d.members||[];data.records=d.records||[];
+    connected.value=true;calcStats();
+  }catch(e){
+    if(e.message.includes('不存在')){
+      // Create initial data.json
+      const init={members:[],records:[]};
+      try{await ghSave(init,'Initial data');data.members=[];data.records=[];connected.value=true;calcStats()}
+      catch(e2){cfgError.value='创建文件失败: '+e2.message}
+    }else cfgError.value='连接失败: '+e.message;
+  }finally{connecting.value=false}
+}
 
-        // ---- Hero ----
-        const heroTab = ref('monthly');
-        const heroYear = ref(now.getFullYear());
-        const heroMonth = ref(now.getMonth()+1);
-        const heroes = ref([]);
+// Stats
+const stats=reactive({totalMembers:0,monthActive:0,monthRecords:0,monthPoints:0});
+const recentRecords=computed(()=>{return[...data.records].sort((a,b)=>(b.created_at||b.id)-(a.created_at||a.id)).slice(0,10)});
+function calcStats(){
+  const n=now,ms=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-01`;
+  const nm=n.getMonth()===11?1:n.getMonth()+2,ny=n.getMonth()===11?n.getFullYear()+1:n.getFullYear();
+  const me=`${ny}-${String(nm).padStart(2,'0')}-01`;
+  const mr=data.records.filter(r=>r.exercise_date>=ms&&r.exercise_date<me);
+  stats.totalMembers=data.members.length;
+  stats.monthActive=new Set(mr.map(r=>r.member_id)).size;
+  stats.monthRecords=mr.length;
+  stats.monthPoints=mr.reduce((s,r)=>s+(r.points||0),0);
+}
 
-        // ---- Manage ----
-        const newName = ref('');
-        const allRecords = ref([]);
-        const filterMember = ref('');
-        const filterMonth = ref('');
+// Rankings
+const tLabel=computed(()=>{if(period.value==='m')return rYear.value+'年'+rMonth.value+'月';if(period.value==='q')return rYear.value+'年 Q'+rQ.value;return rYear.value+'年'});
+function getDateRange(){
+  if(period.value==='m'){const s=`${rYear.value}-${String(rMonth.value).padStart(2,'0')}-01`;const nm=rMonth.value===12?1:rMonth.value+1,ny=rMonth.value===12?rYear.value+1:rYear.value;return[s,`${ny}-${String(nm).padStart(2,'0')}-01`,false]}
+  if(period.value==='q'){const st={1:'01-01',2:'04-01',3:'07-01',4:'10-01'},en={1:'03-31',2:'06-30',3:'09-30',4:'12-31'};return[`${rYear.value}-${st[rQ.value]}`,`${rYear.value}-${en[rQ.value]}`,true]}
+  return[`${rYear.value}-01-01`,`${rYear.value}-12-31`,true];
+}
+function calcRank(){
+  const[s,e,inc]=getDateRange();
+  const recs=data.records.filter(r=>inc?(r.exercise_date>=s&&r.exercise_date<=e):(r.exercise_date>=s&&r.exercise_date<e));
+  const g={};recs.forEach(r=>{if(!g[r.member_id])g[r.member_id]={pts:0,days:new Set};g[r.member_id].pts+=r.points||0;g[r.member_id].days.add(r.exercise_date)});
+  const list=Object.entries(g).map(([mid,v])=>({mid:+mid,name:mname(+mid),pts:v.pts,days:v.days.size})).sort((a,b)=>b.pts-a.pts);
+  list.forEach((x,i)=>x.rank=i+1);
+  // Add zero-point members
+  const ids=new Set(list.map(x=>x.mid));
+  data.members.forEach(m=>{if(!ids.has(m.id))list.push({mid:m.id,name:m.name,pts:0,days:0,rank:list.length+1})});
+  rankList.value=list;
+  const act=list.filter(x=>x.pts>0).length;
+  rInfo.active=act;rInfo.total=data.members.length;rInfo.rate=data.members.length?Math.round(act/data.members.length*100):0;
+}
+function navT(d){if(period.value==='m'){rMonth.value+=d;if(rMonth.value<1){rMonth.value=12;rYear.value--}if(rMonth.value>12){rMonth.value=1;rYear.value++}}else if(period.value==='q'){rQ.value+=d;if(rQ.value<1){rQ.value=4;rYear.value--}if(rQ.value>4){rQ.value=1;rYear.value++}}else rYear.value+=d;calcRank()}
 
-        // ---- Toast ----
-        const toast = reactive({ show:false, msg:'', type:'success' });
-        function showToast(msg, type='success') { toast.msg=msg; toast.type=type; toast.show=true; setTimeout(()=>{toast.show=false},2500); }
+// Heroes
+function calcHeroes(){
+  const s=`${hYear.value}-${String(hMonth.value).padStart(2,'0')}-01`;
+  const nm=hMonth.value===12?1:hMonth.value+1,ny=hMonth.value===12?hYear.value+1:hYear.value;
+  const e=`${ny}-${String(nm).padStart(2,'0')}-01`;
+  const recs=data.records.filter(r=>r.exercise_date>=s&&r.exercise_date<e);
+  const g={};recs.forEach(r=>{if(!g[r.member_id])g[r.member_id]={pts:0,days:new Set};g[r.member_id].pts+=r.points||0;g[r.member_id].days.add(r.exercise_date)});
+  heroes.value=Object.entries(g).map(([mid,v])=>({name:mname(+mid),pts:v.pts,days:v.days.size})).sort((a,b)=>b.pts-a.pts).slice(0,10);
+}
 
-        // ---- Helpers ----
-        function sportName(t) { return {1:'跑步',2:'健走/步行',3:'骑行',4:'健身/力量',5:'球类/游泳/瑜伽',6:'团队运动'}[t]||'未知'; }
-        function memberName(id) { const m = members.value.find(x=>x.id===id); return m ? m.name : '未知'; }
+// Filter records
+function filterRecs(){
+  let recs=[...data.records];
+  if(fMember.value)recs=recs.filter(r=>r.member_id===+fMember.value);
+  if(fMonth.value){const[y,m]=fMonth.value.split('-').map(Number);const s=`${y}-${String(m).padStart(2,'0')}-01`;const nm=m===12?1:m+1,ny=m===12?y+1:y;const e=`${ny}-${String(nm).padStart(2,'0')}-01`;recs=recs.filter(r=>r.exercise_date>=s&&r.exercise_date<e)}
+  filteredRecs.value=recs.sort((a,b)=>b.exercise_date.localeCompare(a.exercise_date));
+}
 
-        // ---- Computed ----
-        const timeLabel = computed(() => {
-            if (period.value==='monthly') return rYear.value+'年'+rMonth.value+'月';
-            if (period.value==='quarterly') return rYear.value+'年 Q'+rQuarter.value;
-            return rYear.value+'年';
-        });
+// Actions
+async function addMember(){
+  if(!newName.value.trim())return showToast('请输入姓名','warning');
+  if(data.members.find(m=>m.name===newName.value.trim()))return showToast('成员已存在','warning');
+  const id=data.members.length?Math.max(...data.members.map(m=>m.id))+1:1;
+  data.members.push({id,name:newName.value.trim()});
+  try{await ghSave(data,`Add member: ${newName.value.trim()}`);newName.value='';showToast('添加成功');calcStats()}
+  catch(e){data.members.pop();showToast('保存失败: '+e.message,'danger')}
+}
+async function removeMember(id){
+  if(!confirm('确定删除？关联记录也将被删除。'))return;
+  const nm=mname(id),oldM=[...data.members],oldR=[...data.records];
+  data.members=data.members.filter(m=>m.id!==id);
+  data.records=data.records.filter(r=>r.member_id!==id);
+  try{await ghSave(data,`Remove member: ${nm}`);showToast('已删除');calcStats();if(view.value==='manage')filterRecs()}
+  catch(e){data.members=oldM;data.records=oldR;showToast('删除失败','danger')}
+}
+function onTC(){form.distance=0;form.steps=0;form.duration=0}
+const preview=computed(()=>calcPts(+form.exercise_type,form.distance,form.steps,form.duration,form.is_team));
 
-        const previewPoints = computed(() => {
-            const t = parseInt(form.exercise_type);
-            if (!t) return 0;
-            const info = {1:{f:'d',th:2,r:0.5},2:{f:'s',th:10000,r:1},3:{f:'d',th:5,r:0.2},4:{f:'t',th:30,r:1},5:{f:'t',th:30,r:1},6:{f:'t',th:30,r:1}}[t];
-            if (!info) return 0;
-            const v = info.f==='d'?form.distance:info.f==='s'?form.steps:form.duration;
-            if (v < info.th) return 0;
-            let pts = info.f==='d' ? Math.floor(v/info.th)*(info.th*info.r) : info.r;
-            if (form.is_team) pts *= 2;
-            return pts;
-        });
+async function submitRecord(){
+  if(!form.member_id)return showToast('请选择成员','warning');
+  saving.value=true;
+  const id=data.records.length?Math.max(...data.records.map(r=>r.id))+1:1;
+  const rec={id,member_id:+form.member_id,exercise_date:form.exercise_date,exercise_type:+form.exercise_type,distance:form.distance||0,steps:form.steps||0,duration:form.duration||0,is_team:!!form.is_team,points:preview.value,note:form.note||'',created_at:Date.now()};
+  data.records.push(rec);
+  try{await ghSave(data,`Record: ${mname(rec.member_id)} ${sn(rec.exercise_type)}`);showToast('打卡成功！获得 '+rec.points+' 积分');form.exercise_type='';form.distance=0;form.steps=0;form.duration=0;form.is_team=false;form.note='';calcStats()}
+  catch(e){data.records.pop();showToast('保存失败: '+e.message,'danger')}
+  finally{saving.value=false}
+}
+async function removeRecord(id){
+  if(!confirm('确定删除此条记录？'))return;
+  const old=[...data.records],idx=data.records.findIndex(r=>r.id===id);
+  data.records.splice(idx,1);
+  try{await ghSave(data,'Remove record');showToast('已删除');filterRecs();calcStats()}
+  catch(e){data.records=old;showToast('删除失败','danger')}
+}
 
-        // ---- Connect to Supabase ----
-        async function connect() {
-            if (!cfg.url || !cfg.key) { cfgError.value = '请填写完整信息'; return; }
-            connecting.value = true;
-            cfgError.value = '';
-            try {
-                sb = window.supabase.createClient(cfg.url, cfg.key);
-                // Test connection
-                const { data, error } = await sb.from('members').select('id').limit(1);
-                if (error) throw error;
-                connected.value = true;
-                await loadAll();
-            } catch(e) {
-                cfgError.value = '连接失败: ' + (e.message || e);
-            } finally {
-                connecting.value = false;
-            }
-        }
+function go(v){view.value=v;if(v==='dashboard')calcStats();else if(v==='ranking')calcRank();else if(v==='hero')calcHeroes();else if(v==='manage')filterRecs()}
 
-        // ---- Data Loading ----
-        async function loadAll() {
-            await loadMembers();
-            await loadDashboard();
-        }
-
-        async function loadMembers() {
-            const { data } = await sb.from('members').select('*').order('name');
-            members.value = data || [];
-            stats.totalMembers = members.value.length;
-        }
-
-        async function loadDashboard() {
-            const now = new Date();
-            const monthStart = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-            const nextMonth = now.getMonth()===11 ? `${now.getFullYear()+1}-01-01` : `${now.getFullYear()}-${String(now.getMonth()+2).padStart(2,'0')}-01`;
-
-            const { data: records } = await sb.from('exercise_records')
-                .select('*,member_id')
-                .gte('exercise_date', monthStart)
-                .lt('exercise_date', nextMonth)
-                .order('created_at', { ascending: false });
-
-            const recs = records || [];
-            const activeSet = new Set(recs.map(r => r.member_id));
-            stats.monthActive = activeSet.size;
-            stats.monthRecords = recs.length;
-            stats.monthPoints = recs.reduce((s, r) => s + (r.points || 0), 0);
-
-            // Recent 10
-            const { data: recent } = await sb.from('exercise_records')
-                .select('*').order('created_at', { ascending: false }).limit(10);
-            recentRecords.value = recent || [];
-        }
-
-        function getDateRange() {
-            if (period.value === 'monthly') {
-                const s = `${rYear.value}-${String(rMonth.value).padStart(2,'0')}-01`;
-                const nm = rMonth.value===12?1:rMonth.value+1;
-                const ny = rMonth.value===12?rYear.value+1:rYear.value;
-                const e = `${ny}-${String(nm).padStart(2,'0')}-01`;
-                return { start: s, end: e, endInclusive: false };
-            } else if (period.value === 'quarterly') {
-                const starts = {1:'01-01',2:'04-01',3:'07-01',4:'10-01'};
-                const ends = {1:'03-31',2:'06-30',3:'09-30',4:'12-31'};
-                return { start: `${rYear.value}-${starts[rQuarter.value]}`, end: `${rYear.value}-${ends[rQuarter.value]}`, endInclusive: true };
-            } else {
-                return { start: `${rYear.value}-01-01`, end: `${rYear.value}-12-31`, endInclusive: true };
-            }
-        }
-
-        async function loadRanking() {
-            const range = getDateRange();
-            let q = sb.from('exercise_records').select('member_id,points,exercise_date');
-            q = q.gte('exercise_date', range.start);
-            if (range.endInclusive) q = q.lte('exercise_date', range.end);
-            else q = q.lt('exercise_date', range.end);
-
-            const { data } = await q;
-            const recs = data || [];
-
-            // Group by member
-            const grouped = {};
-            recs.forEach(r => {
-                if (!grouped[r.member_id]) grouped[r.member_id] = { points:0, days:new Set() };
-                grouped[r.member_id].points += r.points || 0;
-                grouped[r.member_id].days.add(r.exercise_date);
-            });
-
-            const list = Object.entries(grouped).map(([mid, v]) => ({
-                member_id: parseInt(mid),
-                name: memberName(parseInt(mid)),
-                points: v.points,
-                days: v.days.size
-            })).sort((a, b) => b.points - a.points);
-
-            // Add rank and include members with 0 points
-            const allMemberIds = new Set(members.value.map(m => m.id));
-            list.forEach((item, i) => { item.rank = i + 1; allMemberIds.delete(item.member_id); });
-            allMemberIds.forEach(mid => {
-                list.push({ member_id: mid, name: memberName(mid), points: 0, days: 0, rank: list.length + 1 });
-            });
-
-            rankings.value = list;
-            const active = list.filter(x => x.points > 0).length;
-            rankingInfo.active = active;
-            rankingInfo.total = members.value.length;
-            rankingInfo.rate = members.value.length ? Math.round(active / members.value.length * 100) : 0;
-        }
-
-        async function loadHeroes() {
-            const s = `${heroYear.value}-${String(heroMonth.value).padStart(2,'0')}-01`;
-            const nm = heroMonth.value===12?1:heroMonth.value+1;
-            const ny = heroMonth.value===12?heroYear.value+1:heroYear.value;
-            const e = `${ny}-${String(nm).padStart(2,'0')}-01`;
-
-            const { data } = await sb.from('exercise_records')
-                .select('member_id,points,exercise_date')
-                .gte('exercise_date', s).lt('exercise_date', e);
-
-            const recs = data || [];
-            const grouped = {};
-            recs.forEach(r => {
-                if (!grouped[r.member_id]) grouped[r.member_id] = { points:0, days:new Set() };
-                grouped[r.member_id].points += r.points || 0;
-                grouped[r.member_id].days.add(r.exercise_date);
-            });
-
-            heroes.value = Object.entries(grouped)
-                .map(([mid, v]) => ({ name: memberName(parseInt(mid)), points: v.points, days: v.days.size }))
-                .sort((a, b) => b.points - a.points)
-                .slice(0, 10);
-        }
-
-        function loadQBonus() { /* Shows static rules in template */ }
-        function loadABonus() { /* Shows static rules in template */ }
-
-        async function loadAllRecords() {
-            let q = sb.from('exercise_records').select('*');
-            if (filterMember.value) q = q.eq('member_id', parseInt(filterMember.value));
-            if (filterMonth.value) {
-                const [y, m] = filterMonth.value.split('-').map(Number);
-                const s = `${y}-${String(m).padStart(2,'0')}-01`;
-                const nm = m===12?1:m+1, ny = m===12?y+1:y;
-                const e = `${ny}-${String(nm).padStart(2,'0')}-01`;
-                q = q.gte('exercise_date', s).lt('exercise_date', e);
-            }
-            q = q.order('exercise_date', { ascending: false }).limit(200);
-            const { data } = await q;
-            allRecords.value = data || [];
-        }
-
-        // ---- Actions ----
-        async function addMember() {
-            if (!newName.value.trim()) return showToast('请输入姓名', 'warning');
-            const { error } = await sb.from('members').insert({ name: newName.value.trim() });
-            if (error) { showToast(error.message.includes('duplicate')?'成员已存在':'添加失败', 'danger'); return; }
-            newName.value = '';
-            showToast('添加成功');
-            await loadMembers();
-        }
-
-        async function removeMember(id) {
-            if (!confirm('确定删除该成员？关联记录也将被删除。')) return;
-            await sb.from('members').delete().eq('id', id);
-            showToast('已删除');
-            await loadMembers();
-            if (view.value === 'manage') await loadAllRecords();
-        }
-
-        function onTypeChange() { form.distance=0; form.steps=0; form.duration=0; }
-
-        async function submitRecord() {
-            if (!form.member_id) return showToast('请选择成员', 'warning');
-            submitting.value = true;
-            try {
-                const { error } = await sb.from('exercise_records').insert({
-                    member_id: parseInt(form.member_id),
-                    exercise_date: form.exercise_date,
-                    exercise_type: parseInt(form.exercise_type),
-                    distance: form.distance || 0,
-                    steps: form.steps || 0,
-                    duration: form.duration || 0,
-                    is_team: form.is_team || false,
-                    note: form.note || ''
-                });
-                if (error) throw error;
-                const pts = previewPoints.value;
-                showToast('打卡成功！获得 ' + pts + ' 积分');
-                form.exercise_type=''; form.distance=0; form.steps=0; form.duration=0; form.is_team=false; form.note='';
-                await loadDashboard();
-            } catch(e) {
-                showToast('提交失败: ' + (e.message||e), 'danger');
-            } finally {
-                submitting.value = false;
-            }
-        }
-
-        async function removeRecord(id) {
-            if (!confirm('确定删除此条记录？')) return;
-            await sb.from('exercise_records').delete().eq('id', id);
-            showToast('已删除');
-            await loadAllRecords();
-            await loadDashboard();
-        }
-
-        // ---- Navigation ----
-        function go(v) {
-            view.value = v;
-            if (v==='dashboard') loadDashboard();
-            else if (v==='ranking') loadRanking();
-            else if (v==='hero') { if(heroTab.value==='monthly') loadHeroes(); }
-            else if (v==='manage') loadAllRecords();
-        }
-
-        function navTime(d) {
-            if (period.value==='monthly') {
-                rMonth.value+=d; if(rMonth.value<1){rMonth.value=12;rYear.value--} if(rMonth.value>12){rMonth.value=1;rYear.value++}
-            } else if (period.value==='quarterly') {
-                rQuarter.value+=d; if(rQuarter.value<1){rQuarter.value=4;rYear.value--} if(rQuarter.value>4){rQuarter.value=1;rYear.value++}
-            } else { rYear.value+=d; }
-            loadRanking();
-        }
-
-        return {
-            cfg, connected, connecting, cfgError, connect,
-            view, members, stats, recentRecords,
-            form, submitting, sportTypes, previewPoints,
-            period, rYear, rMonth, rQuarter, rankings, rankingInfo, timeLabel,
-            heroTab, heroYear, heroMonth, heroes,
-            newName, allRecords, filterMember, filterMonth,
-            toast, sportName, memberName,
-            go, navTime, onTypeChange,
-            loadRanking, loadHeroes, loadQBonus, loadABonus, loadAllRecords,
-            addMember, removeMember, submitRecord, removeRecord, showToast
-        };
-    }
-}).mount('#app');
+return{cfg,connected,connecting,cfgError,loading,connect,data,view,saving,form,types,preview,period,rYear,rMonth,rQ,rankList,rInfo,tLabel,heroTab,hYear,hMonth,heroes,newName,fMember,fMonth,filteredRecs,toast,stats,recentRecords,sn,mname,go,navT,onTC,calcRank,calcHeroes,filterRecs,addMember,removeMember,submitRecord,removeRecord,showToast}
+}}).mount('#app');
 </script>
 </body>
 </html>
